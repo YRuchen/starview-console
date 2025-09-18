@@ -1,0 +1,56 @@
+# Development environment values for obs-frontend
+replicaCount: 1
+
+fullnameOverride: "frontend"
+
+image:
+  repository: "harbor.gainetics.io/observable/images/obs-frontend"
+  pullPolicy: Always
+  tag: "1.0.4"
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+ingress:
+  className: "alb"
+  annotations:
+    # ALB Ingress Controller 配置
+    kubernetes.io/ingress.class: "alb"
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    # 🔧 添加关键配置 - 与 nightingale 保持一致
+    alb.ingress.kubernetes.io/subnets: subnet-0fe306514d06a67fc,subnet-0f0558867a3a0c067,subnet-0d830c937aaefc8b9
+    alb.ingress.kubernetes.io/group.name: gainetics-eks-dev
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:281179910090:certificate/db238f1d-5c74-4b87-887a-ed47b993f880
+  hosts:
+    - host: www.observe.dev.eks.gainetics.io
+      paths:
+        - path: /
+          pathType: Prefix
+  # 🔧 使用 ACM 证书，不需要 TLS secret
+  tls: []
+
+# Development environment configuration
+env:
+  NODE_ENV: "development"
+  
+  # API 端点配置 - 开发环境
+  VITE_APP_BASE_API: ""
+  VITE_APP_BASE_API_METRICS: "https://alert-manager.observe.dev.gainetics.io"
+  VITE_APP_BASE_API_AVAILABILITY: "https://gateway.observe.dev.eks.gainetics.io"
+  VITE_APP_BASE_API_DOMAIN: "https://gateway.observe.dev.eks.gainetics.io/domain/api/v1"
+  VITE_APP_BASE_API_AIAGENT: "https://gateway.observe.dev.eks.gainetics.io"
+  
+  # 内部服务配置 - 开发环境（统一通过网关访问）
+  VITE_APP_USER_API: "https://gateway.observe.dev.eks.gainetics.io/api/user"
+  VITE_APP_CORE_API: "https://gateway.observe.dev.eks.gainetics.io/api/core"
+
+autoscaling:
+  enabled: false

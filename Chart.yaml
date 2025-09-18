@@ -1,0 +1,15 @@
+apiVersion: v2
+name: obs-frontend
+description: A Helm chart for Observable Frontend Application
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - frontend
+  - vue
+  - nginx
+  - observable
+home: https://github.com/gainetics/obs-frontend
+maintainers:
+  - name: Gainetics Team
+    email: dev@gainetics.io
