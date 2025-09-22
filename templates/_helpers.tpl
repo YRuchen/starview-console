@@ -57,6 +57,10 @@ Create the name of the service account to use
 {{- if .Values.serviceAccount.create }}
 {{- default (include "obs-frontend.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.serviceAccount.name }}
+{{- if .Values.serviceAccount.name }}
+{{- .Values.serviceAccount.name }}
+{{- else }}
+{{- "default" }}
+{{- end }}
 {{- end }}
 {{- end }}

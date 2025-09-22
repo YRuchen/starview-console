@@ -1,5 +1,5 @@
 # Production environment values for obs-frontend
-replicaCount: 2
+replicaCount: 3
 
 fullnameOverride: "frontend"
 
@@ -34,6 +34,12 @@ ingress:
     - secretName: obs-frontend-prod-tls
       hosts:
         - www.observe.gainetics.io
+
+# ServiceAccount configuration - 使用默认 ServiceAccount
+serviceAccount:
+  create: false  # 使用默认的 ServiceAccount
+  name: "scloud-obs-prod-read-write"  # 空字符串表示使用默认 ServiceAccount
+  automount: false  # 🔒 安全：禁用 API 凭据自动挂载
 
 # Production environment configuration
 env:

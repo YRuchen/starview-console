@@ -20,7 +20,7 @@ serviceAccount:
   # Specifies whether a service account should be created
   create: true
   # Automatically mount a ServiceAccount's API credentials?
-  automount: true
+  automount: false  # 🔒 安全：前端应用不需要 Kubernetes API 权限
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.
@@ -31,7 +31,7 @@ podAnnotations: {}
 podLabels: {}
 
 podSecurityContext: {}
-  # fsGroup: 2000
+# fsGroup: 2000
 
 securityContext: {}
   # capabilities:
@@ -39,7 +39,7 @@ securityContext: {}
   #   - ALL
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
-  # runAsUser: 1000
+# runAsUser: 1000
 
 service:
   type: ClusterIP
@@ -121,14 +121,14 @@ affinity: {}
 env:
   # 生产环境
   NODE_ENV: "production"
-  
+
   # API 端点配置
   VITE_APP_BASE_API: ""
   VITE_APP_BASE_API_METRICS: "https://alert-manager.observe.dev.gainetics.io"
   VITE_APP_BASE_API_AVAILABILITY: "https://gateway.observe.dev.eks.gainetics.io"
   VITE_APP_BASE_API_DOMAIN: "https://gateway.observe.dev.eks.gainetics.io/domain/api/v1"
   VITE_APP_BASE_API_AIAGENT: "https://gateway.observe.dev.eks.gainetics.io"
-  
+
   # 内部服务配置（统一通过网关访问）
   VITE_APP_USER_API: "https://gateway.observe.dev.eks.gainetics.io/api/user"
   VITE_APP_CORE_API: "https://gateway.observe.dev.eks.gainetics.io/api/core"
@@ -156,7 +156,7 @@ nginx:
                 root   /usr/share/nginx/html;
                 index  index.html index.htm;
                 try_files $uri $uri/ /index.html;
-                
+    
                 # 添加必要的响应头以支持跨域cookie
                 add_header 'Access-Control-Allow-Origin' 'https://gateway.observe.dev.eks.gainetics.io' always;
                 add_header 'Access-Control-Allow-Credentials' 'true' always;
@@ -171,18 +171,18 @@ nginx:
                 proxy_set_header X-Real-IP $remote_addr;
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
                 proxy_set_header X-Forwarded-Proto $scheme;
-                
+    
                 # 关键：保持cookie传递
                 proxy_pass_request_headers on;
                 proxy_pass_header Set-Cookie;
                 proxy_cookie_domain gateway.observe.dev.eks.gainetics.io www.observe.dev.eks.gainetics.io;
-                
+    
                 # CORS支持
                 add_header 'Access-Control-Allow-Origin' '$http_origin' always;
                 add_header 'Access-Control-Allow-Credentials' 'true' always;
                 add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
                 add_header 'Access-Control-Allow-Headers' 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With' always;
-                
+    
                 # 处理预检请求
                 if ($request_method = 'OPTIONS') {
                     return 204;
