@@ -1,5 +1,5 @@
 # Production environment values for obs-frontend
-replicaCount: 3
+replicaCount: 2
 
 fullnameOverride: "frontend"
 
@@ -26,29 +26,29 @@ ingress:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
   hosts:
-    - host: www.observe.dev.eks.gainetics.io
+    - host: www.observe.gainetics.io
       paths:
         - path: /
           pathType: Prefix
   tls:
     - secretName: obs-frontend-prod-tls
       hosts:
-        - www.observe.dev.eks.gainetics.io
+        - www.observe.gainetics.io
 
 # Production environment configuration
 env:
   NODE_ENV: "production"
-  
+
   # API 端点配置 - 生产环境
   VITE_APP_BASE_API: "https://www.observe.gainetics.io"
   VITE_APP_BASE_API_METRICS: "https://alert-manager.observe.gainetics.io"
   VITE_APP_BASE_API_AVAILABILITY: "https://gateway.observe.gainetics.io"
   VITE_APP_BASE_API_DOMAIN: "https://gateway.observe.gainetics.io/domain/api/v1"
   VITE_APP_BASE_API_AIAGENT: "https://gateway.observe.gainetics.io"
-  
+
   # 内部服务配置 - 生产环境
-  VITE_APP_USER_API: "https://www.observe.gainetics.io"
-  VITE_APP_CORE_API: "https://www.observe.gainetics.io"
+  VITE_APP_USER_API: "https://www.observe.gainetics.io/api/user"
+  VITE_APP_CORE_API: "https://www.observe.gainetics.io/api/core"
 
 autoscaling:
   enabled: true
