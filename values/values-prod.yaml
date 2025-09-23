@@ -4,9 +4,9 @@ replicaCount: 3
 fullnameOverride: "frontend"
 
 image:
-  repository: "harbor.gainetics.io/observable/images/obs-frontend-prod"
+  repository: "harbor.gainetics.io/observable/images/obs-frontend"
   pullPolicy: IfNotPresent
-  tag: "1.0.0"
+  tag: "1.0.4-prod"
 
 resources:
   limits:
@@ -17,23 +17,13 @@ resources:
     memory: 256Mi
 
 ingress:
-  enabled: true
-  className: "nginx"
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-  hosts:
-    - host: www.observe.gainetics.io
-      paths:
-        - path: /
-          pathType: Prefix
-  tls:
-    - secretName: obs-frontend-prod-tls
-      hosts:
-        - www.observe.gainetics.io
+  # 禁用 Helm ingress，因为使用托管的 ALB ingress
+  enabled: false
+  # 托管 ingress 配置信息（仅作参考）:
+  # - namespace: scloud-obs-prod
+  # - 域名: wwww.observe.gainetics.io (4个w)
+  # - ALB ingress controller
+  # - 后端服务: frontend:80
 
 # ServiceAccount configuration - 使用默认 ServiceAccount
 serviceAccount:
@@ -45,16 +35,16 @@ serviceAccount:
 env:
   NODE_ENV: "production"
 
-  # API 端点配置 - 生产环境
-  VITE_APP_BASE_API: "https://www.observe.gainetics.io"
+  # API 端点配置 - 生产环境（使用托管域名 wwww.observe.gainetics.io）
+  VITE_APP_BASE_API: "https://wwww.observe.gainetics.io"
   VITE_APP_BASE_API_METRICS: "https://alert-manager.observe.gainetics.io"
   VITE_APP_BASE_API_AVAILABILITY: "https://gateway.observe.gainetics.io"
   VITE_APP_BASE_API_DOMAIN: "https://gateway.observe.gainetics.io/domain/api/v1"
   VITE_APP_BASE_API_AIAGENT: "https://gateway.observe.gainetics.io"
 
-  # 内部服务配置 - 生产环境
-  VITE_APP_USER_API: "https://www.observe.gainetics.io/api/user"
-  VITE_APP_CORE_API: "https://www.observe.gainetics.io/api/core"
+  # 内部服务配置 - 生产环境（通过托管域名访问）
+  VITE_APP_USER_API: "https://wwww.observe.gainetics.io/api/user"
+  VITE_APP_CORE_API: "https://wwww.observe.gainetics.io/api/core"
 
 autoscaling:
   enabled: true
@@ -62,12 +52,3 @@ autoscaling:
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
-
-nodeSelector:
-  node-role: frontend
-
-tolerations:
-  - key: "frontend-only"
-    operator: "Equal"
-    value: "true"
-    effect: "NoSchedule"

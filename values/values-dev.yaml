@@ -6,7 +6,7 @@ fullnameOverride: "frontend"
 image:
   repository: "harbor.gainetics.io/observable/images/obs-frontend"
   pullPolicy: Always
-  tag: "1.0.20"
+  tag: "1.0.21-test"
 
 resources:
   limits:
@@ -40,17 +40,23 @@ ingress:
 # Development environment configuration
 env:
   NODE_ENV: "development"
-  
+
   # API 端点配置 - 开发环境
   VITE_APP_BASE_API: ""
   VITE_APP_BASE_API_METRICS: "https://alert-manager.observe.dev.gainetics.io"
   VITE_APP_BASE_API_AVAILABILITY: "https://gateway.observe.dev.eks.gainetics.io"
   VITE_APP_BASE_API_DOMAIN: "https://gateway.observe.dev.eks.gainetics.io/domain/api/v1"
   VITE_APP_BASE_API_AIAGENT: "https://gateway.observe.dev.eks.gainetics.io"
-  
+
   # 内部服务配置 - 开发环境（统一通过网关访问）
   VITE_APP_USER_API: "https://gateway.observe.dev.eks.gainetics.io/api/user"
   VITE_APP_CORE_API: "https://gateway.observe.dev.eks.gainetics.io/api/core"
+
+# ServiceAccount configuration - 使用默认 ServiceAccount
+serviceAccount:
+  create: false  # 使用默认的 ServiceAccount
+  name: "scloud-obs-prod-read-write"  # 空字符串表示使用默认 ServiceAccount
+  automount: false  # 🔒 安全：禁用 API 凭据自动挂载
 
 autoscaling:
   enabled: false
