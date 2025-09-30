@@ -2,8 +2,8 @@ apiVersion: v2
 name: obs-frontend
 description: A Helm chart for Observable Frontend Application
 type: application
-version: 1.0.9
-appVersion: "1.0.4"
+version: 1.0.14
+appVersion: "1.0.31"
 keywords:
   - frontend
   - vue

@@ -6,7 +6,7 @@ fullnameOverride: "frontend"
 image:
   repository: "harbor.gainetics.io/observable/images/obs-frontend"
   pullPolicy: Always
-  tag: "1.0.21-test"
+  tag: "1.0.31-test"
 
 resources:
   limits:
