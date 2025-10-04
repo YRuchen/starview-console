@@ -11,7 +11,7 @@ service:
 image:
   repository: "harbor.gainetics.io/observable/images/obs-frontend"
   pullPolicy: Always
-  tag: "1.0.31-test"
+  tag: "v1.0.1-07a3adc-202510041549"
 
 resources:
   limits:
