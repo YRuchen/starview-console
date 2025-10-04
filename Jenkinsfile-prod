@@ -1,0 +1,76 @@
+pipeline {
+    agent any
+
+    stages {
+        stage("对 EKS PROD 环境进行发版") {
+            steps {
+                script {
+                    withCredentials([file(credentialsId: '16b56e7a-f709-4de7-bdc2-2db8eac07561', variable: 'KUBECONFIG_FILE')]) {
+                        sh '''
+                            export KUBECONFIG=$KUBECONFIG_FILE
+                            helm upgrade obs-frontend ./helm-chart/ \
+                              --namespace scloud-obs-prod \
+                              --values ./values/values-prod.yaml
+                        '''
+                    }
+                }
+
+            }
+        }
+
+        stage("对 PROD 环境发版后进行通知") {
+            environment {
+                // 获取 Git 提交哈希
+                GIT_COMMIT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                // 获取最近的 commit message
+                GIT_COMMIT_MESSAGE = sh(script: 'git log -1 --pretty=%s', returnStdout: true).trim()
+                // 获取最后的提交人信息
+                GIT_COMMIT_AUTHOR = sh(script: 'git log -1 --pretty=%an', returnStdout: true).trim()
+                // 获取当前时间格式化为 YYYYMMDDHHMM
+                // BUILD_TIME = sh(script: 'date +%Y%m%d%H%M', returnStdout: true).trim()
+                // 构造镜像名称和tag
+                IMAGE_NAME = "obs-frontend"
+                IMAGE_TAG = "${params.APP_VERSION}-${GIT_COMMIT}-${BUILD_TIME}"
+                // 定义组件tag信息
+                DOCKER_IMAGE = "${IMAGE_NAME}:${IMAGE_TAG}"
+
+                TELEGRAM_BOT_TOKEN = "8274385334:AAElklhX6LoVC-yZ_nYLxwa34MHoq5XuNEU"
+                TELEGRAM_CHAT_ID = "-1003004444115"
+
+
+            }
+            steps {
+                script {
+                    def userName = currentBuild.rawBuild.getCause(hudson.model.Cause$UserIdCause)?.getUserName()
+                    def tag = sh(
+                        script: "yq '.image.tag' values/values-prod.yaml",
+                        returnStdout: true
+                    ).trim()
+                    
+                    // 提取 commit id（假设格式固定为 vX.Y.Z-<commit>-<timestamp>）
+                    def commitId = tag.tokenize('-')[1]
+                    def alert_message = """
+EKS PROD 环境最新发布:
+(1)发布内容: 
+obs-frontend 更新
+commit id: ${commitId}
+容器镜像新tag: ${tag}
+(2)发布提交人: ${userName}
+(3)发布审核人: ${userName}
+(4)发布执行人: ${userName}
+                    """.stripIndent()
+                    // 写入临时文件
+                    writeFile file: 'alert.txt', text: alert_message.stripIndent()
+
+                    // 发送消息
+                    sh(script: """
+                        curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \\
+                             -d "chat_id=${TELEGRAM_CHAT_ID}" \\
+                             --data-urlencode "text@alert.txt"
+                    """)
+
+                }
+            }
+        }
+    }
+}
