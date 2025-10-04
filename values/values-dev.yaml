@@ -13,6 +13,9 @@ image:
   pullPolicy: Always
   tag: "v1.0.0-2214f9c-202510042008"
 
+imagePullSecrets:
+  - name: docker-registry-secret
+
 resources:
   limits:
     cpu: 200m
