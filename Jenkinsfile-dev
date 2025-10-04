@@ -35,7 +35,7 @@ pipeline {
                 DOCKER_IMAGE = "${IMAGE_NAME}:${IMAGE_TAG}"
 
                 TELEGRAM_BOT_TOKEN = "8274385334:AAElklhX6LoVC-yZ_nYLxwa34MHoq5XuNEU"
-                TELEGRAM_CHAT_ID = "-1002822382089"
+                TELEGRAM_CHAT_ID = "-1003004444115"
 
 
             }
