@@ -86,7 +86,7 @@ nginx:
 
         server {
             listen       80;
-            server_name  wwww.observe.gainetics.io;
+            server_name  wwww.observe.dev.eks.gainetics.io;
 
             location / {
                 root   /usr/share/nginx/html;
@@ -94,7 +94,7 @@ nginx:
                 try_files $uri $uri/ /index.html;
 
                 # 添加必要的响应头以支持跨域cookie
-                add_header 'Access-Control-Allow-Origin' 'https://gateway.observe.gainetics.io' always;
+                add_header 'Access-Control-Allow-Origin' 'https://gateway.observe.dev.eks.gainetics.io' always;
                 add_header 'Access-Control-Allow-Credentials' 'true' always;
                 add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
                 add_header 'Access-Control-Allow-Headers' 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With' always;
@@ -102,16 +102,16 @@ nginx:
 
             # API代理配置 - 确保cookie能正确传递
             location /api/ {
-                proxy_pass https://gateway.observe.gainetics.io/api/;
+                proxy_pass https://gateway.observe.dev.eks.gainetics.io/api/;
                 proxy_set_header Host $host;
                 proxy_set_header X-Real-IP $remote_addr;
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
                 proxy_set_header X-Forwarded-Proto $scheme;
 
-                # 关键：保持cookie传递
+                # 关键:保持cookie传递
                 proxy_pass_request_headers on;
                 proxy_pass_header Set-Cookie;
-                proxy_cookie_domain gateway.observe.gainetics.io wwww.observe.gainetics.io;
+                proxy_cookie_domain gateway.observe.dev.eks.gainetics.io wwww.observe.dev.eks.gainetics.io;
 
                 # CORS支持
                 add_header 'Access-Control-Allow-Origin' '$http_origin' always;
