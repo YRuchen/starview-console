@@ -8,7 +8,7 @@ pipeline {
                     withCredentials([file(credentialsId: '16b56e7a-f709-4de7-bdc2-2db8eac07561', variable: 'KUBECONFIG_FILE')]) {
                         sh '''
                             export KUBECONFIG=$KUBECONFIG_FILE
-                            helm upgrade obs-frontend ./helm-chart/ \
+                            helm upgrade --install frontend ./helm-chart/ \
                               --namespace scloud-obs-prod \
                               --values ./values/values-prod.yaml
                         '''
@@ -21,7 +21,7 @@ pipeline {
         stage("对 PROD 环境发版后进行通知") {
             environment {
                 // 获取 Git 提交哈希
-                GIT_COMMIT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                GIT_COMMIT = sh(script: 'git rev-parse --short=8 HEAD', returnStdout: true).trim()
                 // 获取最近的 commit message
                 GIT_COMMIT_MESSAGE = sh(script: 'git log -1 --pretty=%s', returnStdout: true).trim()
                 // 获取最后的提交人信息
