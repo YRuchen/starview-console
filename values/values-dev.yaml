@@ -1,21 +1,15 @@
-# Development environment values for obs-frontend
 replicaCount: 1
-
-fullnameOverride: "frontend"
-
+fullnameOverride: frontend
 service:
   type: ClusterIP
   port: 80
   targetPort: 80
-
 image:
-  repository: "harbor.gainetics.io/observable/images/obs-frontend"
+  repository: harbor.gainetics.io/observable/images/obs-frontend
   pullPolicy: Always
-  tag: "v1.0.0-a35ec57-202510150019"
-
+  tag: v1.1.0-80012e3-202510211842
 imagePullSecrets:
-  - name: docker-registry-secret
-
+- name: docker-registry-secret
 resources:
   limits:
     cpu: 200m
@@ -23,111 +17,65 @@ resources:
   requests:
     cpu: 50m
     memory: 64Mi
-
 ingress:
-  className: "alb"
+  className: alb
   annotations:
-    # ALB Ingress Controller 配置
-    kubernetes.io/ingress.class: "alb"
+    kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
-    alb.ingress.kubernetes.io/ssl-redirect: "443"
-    # 🔧 添加关键配置 - 与 nightingale 保持一致
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
     alb.ingress.kubernetes.io/subnets: subnet-0fe306514d06a67fc,subnet-0f0558867a3a0c067,subnet-0d830c937aaefc8b9
     alb.ingress.kubernetes.io/group.name: gainetics-eks-dev
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:281179910090:certificate/db238f1d-5c74-4b87-887a-ed47b993f880
   hosts:
-    - host: www.observe.dev.eks.gainetics.io
-      paths:
-        - path: /
-          pathType: Prefix
-  # 🔧 使用 ACM 证书，不需要 TLS secret
+  - host: www.observe.dev.eks.gainetics.io
+    paths:
+    - path: /
+      pathType: Prefix
   tls: []
-
-# Development environment configuration
 env:
-  NODE_ENV: "development"
-
-  # API 端点配置 - 开发环境
-  VITE_APP_BASE_API: ""
-  VITE_APP_BASE_API_METRICS: "https://alert-manager.observe.dev.gainetics.io"
-  VITE_APP_BASE_API_AVAILABILITY: "https://gateway.observe.dev.eks.gainetics.io"
-  VITE_APP_BASE_API_DOMAIN: "https://gateway.observe.dev.eks.gainetics.io/domain/api/v1"
-  VITE_APP_BASE_API_AIAGENT: "https://gateway.observe.dev.eks.gainetics.io"
-
-  # 内部服务配置 - 开发环境（统一通过网关访问）
-  VITE_APP_USER_API: "https://gateway.observe.dev.eks.gainetics.io/api/user"
-  VITE_APP_CORE_API: "https://gateway.observe.dev.eks.gainetics.io/api/core"
-
-# ServiceAccount configuration - 使用默认 ServiceAccount
+  NODE_ENV: development
+  VITE_APP_BASE_API: ''
+  VITE_APP_BASE_API_METRICS: https://alert-manager.observe.dev.gainetics.io
+  VITE_APP_BASE_API_AVAILABILITY: https://gateway.observe.dev.eks.gainetics.io
+  VITE_APP_BASE_API_DOMAIN: https://gateway.observe.dev.eks.gainetics.io/domain/api/v1
+  VITE_APP_BASE_API_AIAGENT: https://gateway.observe.dev.eks.gainetics.io
+  VITE_APP_USER_API: https://gateway.observe.dev.eks.gainetics.io/api/user
+  VITE_APP_CORE_API: https://gateway.observe.dev.eks.gainetics.io/api/core
 serviceAccount:
-  create: false # 使用默认的 ServiceAccount
-  name: "scloud-obs-dev-read-write" # 空字符串表示使用默认 ServiceAccount
-  automount: false # 🔒 安全：禁用 API 凭据自动挂载
-
+  create: false
+  name: scloud-obs-dev-read-write
+  automount: false
 autoscaling:
   enabled: false
-
-# Nginx configuration
 nginx:
-  config: |
-    worker_processes  1;
-
-    events {
-        worker_connections  1024;
-    }
-
-    http {
-        include       /etc/nginx/mime.types;
-        default_type  application/octet-stream;
-        sendfile        on;
-        keepalive_timeout  65;
-
-        server {
-            listen       80;
-            server_name  wwww.observe.dev.eks.gainetics.io;
-
-            location / {
-                root   /usr/share/nginx/html;
-                index  index.html index.htm;
-                try_files $uri $uri/ /index.html;
-
-                # 添加必要的响应头以支持跨域cookie
-                add_header 'Access-Control-Allow-Origin' 'https://gateway.observe.dev.eks.gainetics.io' always;
-                add_header 'Access-Control-Allow-Credentials' 'true' always;
-                add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
-                add_header 'Access-Control-Allow-Headers' 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With' always;
-            }
-
-            # API代理配置 - 确保cookie能正确传递
-            location /api/ {
-                proxy_pass https://gateway.observe.dev.eks.gainetics.io/api/;
-                proxy_set_header Host $host;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto $scheme;
-
-                # 关键:保持cookie传递
-                proxy_pass_request_headers on;
-                proxy_pass_header Set-Cookie;
-                proxy_cookie_domain gateway.observe.dev.eks.gainetics.io wwww.observe.dev.eks.gainetics.io;
-
-                # CORS支持
-                add_header 'Access-Control-Allow-Origin' '$http_origin' always;
-                add_header 'Access-Control-Allow-Credentials' 'true' always;
-                add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
-                add_header 'Access-Control-Allow-Headers' 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With' always;
-
-                # 处理预检请求
-                if ($request_method = 'OPTIONS') {
-                    return 204;
-                }
-            }
-
-            error_page   500 502 503 504  /50x.html;
-            location = /50x.html {
-                root   /usr/share/nginx/html;
-            }
-        }
-    }
+  config: "worker_processes  1;\n\nevents {\n    worker_connections  1024;\n}\n\n\
+    http {\n    include       /etc/nginx/mime.types;\n    default_type  application/octet-stream;\n\
+    \    sendfile        on;\n    keepalive_timeout  65;\n\n    server {\n       \
+    \ listen       80;\n        server_name  wwww.observe.dev.eks.gainetics.io;\n\n\
+    \        location / {\n            root   /usr/share/nginx/html;\n           \
+    \ index  index.html index.htm;\n            try_files $uri $uri/ /index.html;\n\
+    \n            # \u6DFB\u52A0\u5FC5\u8981\u7684\u54CD\u5E94\u5934\u4EE5\u652F\u6301\
+    \u8DE8\u57DFcookie\n            add_header 'Access-Control-Allow-Origin' 'https://gateway.observe.dev.eks.gainetics.io'\
+    \ always;\n            add_header 'Access-Control-Allow-Credentials' 'true' always;\n\
+    \            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE,\
+    \ OPTIONS' always;\n            add_header 'Access-Control-Allow-Headers' 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With'\
+    \ always;\n        }\n\n        # API\u4EE3\u7406\u914D\u7F6E - \u786E\u4FDDcookie\u80FD\
+    \u6B63\u786E\u4F20\u9012\n        location /api/ {\n            proxy_pass https://gateway.observe.dev.eks.gainetics.io/api/;\n\
+    \            proxy_set_header Host $host;\n            proxy_set_header X-Real-IP\
+    \ $remote_addr;\n            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\
+    \            proxy_set_header X-Forwarded-Proto $scheme;\n\n            # \u5173\
+    \u952E:\u4FDD\u6301cookie\u4F20\u9012\n            proxy_pass_request_headers\
+    \ on;\n            proxy_pass_header Set-Cookie;\n            proxy_cookie_domain\
+    \ gateway.observe.dev.eks.gainetics.io wwww.observe.dev.eks.gainetics.io;\n\n\
+    \            # CORS\u652F\u6301\n            add_header 'Access-Control-Allow-Origin'\
+    \ '$http_origin' always;\n            add_header 'Access-Control-Allow-Credentials'\
+    \ 'true' always;\n            add_header 'Access-Control-Allow-Methods' 'GET,\
+    \ POST, PUT, DELETE, OPTIONS' always;\n            add_header 'Access-Control-Allow-Headers'\
+    \ 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With'\
+    \ always;\n\n            # \u5904\u7406\u9884\u68C0\u8BF7\u6C42\n            if\
+    \ ($request_method = 'OPTIONS') {\n                return 204;\n            }\n\
+    \        }\n\n        error_page   500 502 503 504  /50x.html;\n        location\
+    \ = /50x.html {\n            root   /usr/share/nginx/html;\n        }\n    }\n\
+    }\n"
