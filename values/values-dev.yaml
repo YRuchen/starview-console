@@ -7,7 +7,7 @@ service:
 image:
   repository: harbor.gainetics.io/observable/images/obs-frontend
   pullPolicy: Always
-  tag: v1.1.0-2fc74f5-202510282329
+  tag: v1.1.0-1a55c4e-202510291043
 imagePullSecrets:
 - name: docker-registry-secret
 resources:
@@ -49,66 +49,32 @@ serviceAccount:
   automount: false
 autoscaling:
   enabled: false
-
 nginx:
-  config: |
-    worker_processes  1;
-    
-    events {
-        worker_connections  1024;
-    }
-    
-    http {
-        include       /etc/nginx/mime.types;
-        include       /etc/nginx/conf.d/*.conf;
-        default_type  application/octet-stream;
-        sendfile        on;
-        keepalive_timeout  65;
-    
-        server {
-            listen       80;
-            server_name  wwww.observe.gainetics.io;
-    
-            location / {
-                root   /usr/share/nginx/html;
-                index  index.html index.htm;
-                try_files $uri $uri/ /index.html;
-    
-                # 添加必要的响应头以支持跨域cookie
-                add_header 'Access-Control-Allow-Origin' 'https://gateway.observe.gainetics.io' always;
-                add_header 'Access-Control-Allow-Credentials' 'true' always;
-                add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
-                add_header 'Access-Control-Allow-Headers' 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With' always;
-            }
-    
-            # API代理配置 - 确保cookie能正确传递
-            location /api/ {
-                proxy_pass https://gateway.observe.gainetics.io/api/;
-                proxy_set_header Host $host;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto $scheme;
-    
-                # 关键: 保持cookie传递
-                proxy_pass_request_headers on;
-                proxy_pass_header Set-Cookie;
-                proxy_cookie_domain gateway.observe.gainetics.io wwww.observe.gainetics.io;
-    
-                # CORS支持
-                add_header 'Access-Control-Allow-Origin' '$http_origin' always;
-                add_header 'Access-Control-Allow-Credentials' 'true' always;
-                add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
-                add_header 'Access-Control-Allow-Headers' 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With' always;
-    
-                # 处理预检请求
-                if ($request_method = 'OPTIONS') {
-                    return 204;
-                }
-            }
-    
-            error_page   500 502 503 504  /50x.html;
-            location = /50x.html {
-                root   /usr/share/nginx/html;
-            }
-        }
-    }
+  config: "worker_processes  1;\n\nevents {\n    worker_connections  1024;\n}\n\n\
+    http {\n    include       /etc/nginx/mime.types;\n    include       /etc/nginx/conf.d/*.conf;\n\
+    \    default_type  application/octet-stream;\n    sendfile        on;\n    keepalive_timeout\
+    \  65;\n\n    server {\n        listen       80;\n        server_name  wwww.observe.gainetics.io;\n\
+    \n        location / {\n            root   /usr/share/nginx/html;\n          \
+    \  index  index.html index.htm;\n            try_files $uri $uri/ /index.html;\n\
+    \n            # \u6DFB\u52A0\u5FC5\u8981\u7684\u54CD\u5E94\u5934\u4EE5\u652F\u6301\
+    \u8DE8\u57DFcookie\n            add_header 'Access-Control-Allow-Origin' 'https://gateway.observe.gainetics.io'\
+    \ always;\n            add_header 'Access-Control-Allow-Credentials' 'true' always;\n\
+    \            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE,\
+    \ OPTIONS' always;\n            add_header 'Access-Control-Allow-Headers' 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With'\
+    \ always;\n        }\n\n        # API\u4EE3\u7406\u914D\u7F6E - \u786E\u4FDDcookie\u80FD\
+    \u6B63\u786E\u4F20\u9012\n        location /api/ {\n            proxy_pass https://gateway.observe.gainetics.io/api/;\n\
+    \            proxy_set_header Host $host;\n            proxy_set_header X-Real-IP\
+    \ $remote_addr;\n            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\
+    \            proxy_set_header X-Forwarded-Proto $scheme;\n\n            # \u5173\
+    \u952E: \u4FDD\u6301cookie\u4F20\u9012\n            proxy_pass_request_headers\
+    \ on;\n            proxy_pass_header Set-Cookie;\n            proxy_cookie_domain\
+    \ gateway.observe.gainetics.io wwww.observe.gainetics.io;\n\n            # CORS\u652F\
+    \u6301\n            add_header 'Access-Control-Allow-Origin' '$http_origin' always;\n\
+    \            add_header 'Access-Control-Allow-Credentials' 'true' always;\n  \
+    \          add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE,\
+    \ OPTIONS' always;\n            add_header 'Access-Control-Allow-Headers' 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With'\
+    \ always;\n\n            # \u5904\u7406\u9884\u68C0\u8BF7\u6C42\n            if\
+    \ ($request_method = 'OPTIONS') {\n                return 204;\n            }\n\
+    \        }\n\n        error_page   500 502 503 504  /50x.html;\n        location\
+    \ = /50x.html {\n            root   /usr/share/nginx/html;\n        }\n    }\n\
+    }\n"
