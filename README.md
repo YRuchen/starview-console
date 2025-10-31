@@ -173,3 +173,9 @@ kubectl port-forward svc/obs-frontend 8080:80
 ## 支持和贡献
 
 如有问题或建议，请联系 Gainetics 开发团队。
+
+
+EKS PROD 部署：
+```shell
+helm upgrade --install frontend ./helm-chart -f values/values-prod.yaml -n scloud-obs-prod
+```

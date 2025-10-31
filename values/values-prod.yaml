@@ -11,7 +11,7 @@ service:
 image:
   repository: "harbor.gainetics.io/observable/images/obs-frontend"
   pullPolicy: IfNotPresent
-  tag: "v1.0.0-ddf7124-202510081318"
+  tag: "v1.1.0-95091cd-202510311741"
 
 imagePullSecrets:
   - name: docker-registry-secret
@@ -32,12 +32,6 @@ ingress:
   # - 域名: wwww.observe.gainetics.io (4个w)
   # - ALB ingress controller
   # - 后端服务: frontend:80
-
-# ServiceAccount configuration - 使用默认 ServiceAccount
-serviceAccount:
-  create: false  # 使用默认的 ServiceAccount
-  name: "scloud-obs-prod-read-write"  # 空字符串表示使用默认 ServiceAccount
-  automount: false  # 🔒 安全：禁用 API 凭据自动挂载
 
 # Production environment configuration
 env:
