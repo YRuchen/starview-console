@@ -11,7 +11,7 @@ service:
 image:
   repository: "harbor.gainetics.io/observable/images/obs-frontend"
   pullPolicy: IfNotPresent
-  tag: v1.3.0-bc87048-202512032329
+  tag: v1.4.0-aa35c5a-202512192142
 
 imagePullSecrets:
   - name: docker-registry-secret
