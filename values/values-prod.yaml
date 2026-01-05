@@ -55,6 +55,22 @@ autoscaling:
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
 
+volumes: 
+  - name: tz-localtime
+    hostPath:
+      path: /etc/localtime
+  - name: tz-timezone
+    hostPath:
+      path: /etc/timezone
+
+volumeMounts:
+  - name: tz-localtime
+    mountPath: /etc/localtime
+    readOnly: true
+  - name: tz-timezone
+    mountPath: /etc/timezone
+    readOnly: true
+
 # Nginx configuration
 nginx:
   config: |

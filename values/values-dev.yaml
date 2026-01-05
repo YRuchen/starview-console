@@ -49,6 +49,23 @@ serviceAccount:
   automount: false
 autoscaling:
   enabled: false
+
+volumes: 
+  - name: tz-localtime
+    hostPath:
+      path: /etc/localtime
+  - name: tz-timezone
+    hostPath:
+      path: /etc/timezone
+
+volumeMounts:
+  - name: tz-localtime
+    mountPath: /etc/localtime
+    readOnly: true
+  - name: tz-timezone
+    mountPath: /etc/timezone
+    readOnly: true
+
 nginx:
   config: "worker_processes  1;\n\nevents {\n    worker_connections  1024;\n}\n\n\
     http {\n    include       /etc/nginx/mime.types;\n    include       /etc/nginx/conf.d/*.conf;\n\
