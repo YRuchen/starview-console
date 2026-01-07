@@ -11,7 +11,7 @@ service:
 image:
   repository: "harbor.gainetics.io/observable/images/obs-frontend"
   pullPolicy: IfNotPresent
-  tag: v1.4.0-f118772-202601022132
+  tag: v1.4.0-e62e73d-202601072211
 
 imagePullSecrets:
   - name: docker-registry-secret
@@ -55,7 +55,7 @@ autoscaling:
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
 
-volumes: 
+volumes:
   - name: tz-localtime
     hostPath:
       path: /etc/localtime
